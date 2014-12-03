@@ -21,6 +21,7 @@ from utils import fromUtf8, WindowSize, sysopen
 from mainwindow_ui import Ui_MainWindow
 from strategy_runner import StrategyRunner
 from loader import load_from_yahoo, _load_raw_yahoo_data
+from utils import global_shared
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,8 @@ class MainWindow(QtGui.QMainWindow):
         super(MainWindow, self).__init__(parent)
         self.ui_controller = Ui_MainWindow()
         self.ui_controller.setupUi(self)
+        global global_shared
+        global_shared['status_bar'] = self.ui_controller.statusbar
         self.connect()
         self.ui_controller.matplotlibWidget.connect()
         self.init_style_menu()
@@ -49,6 +52,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui_controller.styleMenu.addAction(self.ui_controller.barChartAction)
         self.ui_controller.styleMenu.addAction(self.ui_controller.candleChartAction)
         self.ui_controller.styleToolButton.setMenu(self.ui_controller.styleMenu)
+        
+        for action in self.ui_controller.styleMenu.actions():
+            action.triggered.connect(partial(self.ui_controller.matplotlibWidget.on_change_plot_style, action))
 
     def init_indicator_menu(self):
         self.ui_controller.indicatorMenu = QtGui.QMenu(self)
@@ -56,11 +62,18 @@ class MainWindow(QtGui.QMainWindow):
         self.ui_controller.indicator_EMAAction = QtGui.QAction("Exponential Moving Average (EMA)", self)
         self.ui_controller.indicator_MACDAction = QtGui.QAction("MACD", self)
         self.ui_controller.indicator_RSIAction = QtGui.QAction("Relative Strength Index (RSI)", self)
+        self.ui_controller.indicator_SMAAction.setData(QtCore.QVariant('SMA'))
+        self.ui_controller.indicator_EMAAction.setData(QtCore.QVariant('EMA'))
+        self.ui_controller.indicator_MACDAction.setData(QtCore.QVariant('MACD'))
+        self.ui_controller.indicator_RSIAction.setData(QtCore.QVariant('RSI'))
         self.ui_controller.indicatorMenu.addAction(self.ui_controller.indicator_SMAAction)
         self.ui_controller.indicatorMenu.addAction(self.ui_controller.indicator_EMAAction)
         self.ui_controller.indicatorMenu.addAction(self.ui_controller.indicator_MACDAction)
         self.ui_controller.indicatorMenu.addAction(self.ui_controller.indicator_RSIAction)
         self.ui_controller.indicatorToolButton.setMenu(self.ui_controller.indicatorMenu)
+
+        for action in self.ui_controller.indicatorMenu.actions():
+            action.triggered.connect(partial(self.ui_controller.matplotlibWidget.add_indicator, action))
 
     def init_strategy_panel(self):
         strategy_files = sorted(glob.glob('%s/*.py' % strategy_path))
@@ -103,7 +116,7 @@ class MainWindow(QtGui.QMainWindow):
 
             if 'datetime' in df.columns and not df['datetime'].empty:
                 self.ui_controller.matplotlibWidget.set_data(df)
-                self.ui_controller.matplotlibWidget.draw_data()
+                self.ui_controller.matplotlibWidget.render()
             self.df = df
 
     def on_toolButtonClicked(self, button):
@@ -171,10 +184,16 @@ class MainWindow(QtGui.QMainWindow):
             lambda row: mdates.date2num(row['datetime']),
             axis=1)
         if 'adj close' in self.df.columns:
-            self.df['close'] = self.df['adj close']
+            ratio = self.df['adj close']/self.df['close']
+            self.df['open'] = self.df['open']*ratio
+            self.df['high'] = self.df['high']*ratio
+            self.df['low'] = self.df['low']*ratio
+            self.df['close'] = self.df['close']*ratio
 
         self.ui_controller.matplotlibWidget.set_data(self.df)
-        self.ui_controller.matplotlibWidget.draw_data()
+        self.ui_controller.matplotlibWidget.render()
+        self.on_toolButtonClicked(
+            self.ui_controller.buttonGroup.checkedButton())
         self.ui_controller.symbolLineEdit.setText('')
 
 

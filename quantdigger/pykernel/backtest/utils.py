@@ -1,7 +1,7 @@
 __author__ = 'Wenwei Huang'
 
 
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui
 import os, sys
 
 try:
@@ -10,7 +10,17 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
+tr=_translate
+
 fromUtf8 = _fromUtf8
+global_shared = {}
 
 class WindowSize(object):
     ONEDAY = 'ONEDAY'
@@ -31,3 +41,9 @@ def sysopen(filename):
         os.system('open %s' % filename)
     elif os.name == 'posix':
         os.system('xdg-open %s' % filename)
+
+def init_global():
+    global global_shared
+    global_shared = {}
+
+

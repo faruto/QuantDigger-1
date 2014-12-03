@@ -5,6 +5,9 @@ from PyQt4 import QtGui
 
 from mainwindow import MainWindow
 
+import utils
+utils.init_global()
+
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainwindow_ui.ui'
 #
-# Created: Wed Nov 26 17:14:54 2014
+# Created: Tue Dec  2 11:58:44 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -119,7 +119,17 @@ class Ui_MainWindow(object):
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
         self.horizontalLayout_2.addWidget(self.pushButton)
         self.verticalLayout_3.addLayout(self.horizontalLayout_2)
-        self.matplotlibWidget = MatplotlibWidget(self.chartTab)
+        self.scrollArea = QtGui.QScrollArea(self.chartTab)
+        self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
+        self.scrollAreaWidgetContents_2 = QtGui.QWidget()
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 733, 527))
+        self.scrollAreaWidgetContents_2.setObjectName(_fromUtf8("scrollAreaWidgetContents_2"))
+        self.verticalLayout_4 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents_2)
+        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.matplotlibWidget = MatplotlibWidget(self.scrollAreaWidgetContents_2)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -127,7 +137,9 @@ class Ui_MainWindow(object):
         self.matplotlibWidget.setSizePolicy(sizePolicy)
         self.matplotlibWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.matplotlibWidget.setObjectName(_fromUtf8("matplotlibWidget"))
-        self.verticalLayout_3.addWidget(self.matplotlibWidget)
+        self.verticalLayout_4.addWidget(self.matplotlibWidget)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents_2)
+        self.verticalLayout_3.addWidget(self.scrollArea)
         self.tabWidget.addTab(self.chartTab, _fromUtf8(""))
         self.statsTab = QtGui.QWidget()
         self.statsTab.setObjectName(_fromUtf8("statsTab"))
